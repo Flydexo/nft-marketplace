@@ -33,8 +33,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({
   loadMore,
   hasNextPage,
   loading,
-  badges,
-  setBadges
+  badges
 }) => {
   function returnNFTs() {
     return NFTS.map((item: NftType) => (
