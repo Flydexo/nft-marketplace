@@ -7,7 +7,6 @@ import gradient from 'random-gradient';
 import { middleEllipsis } from 'utils/strings';
 import { UserType } from 'interfaces';
 import { follow, unfollow, isUserFollowing, getFollowedCount, getFollowersCount } from 'actions/follower';
-import { getBadges } from 'actions/user';
 import { NODE_API_URL } from 'utils/constant';
 
 export interface InfosProps {
