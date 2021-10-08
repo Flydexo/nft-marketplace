@@ -7,7 +7,7 @@ import PublicProfile from 'components/pages/PublicProfile';
 import NotAvailableModal from 'components/base/NotAvailable';
 import cookies from 'next-cookies';
 
-import { getUser, getProfile } from 'actions/user';
+import { getUser, getProfile, getBadges } from 'actions/user';
 import { getCreatorNFTS } from 'actions/nft';
 import { NftType, UserType } from 'interfaces';
 import { NextPageContext } from 'next';
@@ -18,6 +18,7 @@ export interface PublicProfileProps {
   profile: UserType;
   data: NftType[];
   dataHasNextPage: boolean;
+  badges: any
 }
 
 const PublicProfilePage: React.FC<PublicProfileProps> = ({
@@ -25,11 +26,13 @@ const PublicProfilePage: React.FC<PublicProfileProps> = ({
   data,
   profile,
   dataHasNextPage,
+  badges
 }) => {
   const [modalExpand, setModalExpand] = useState(false);
   const [notAvailable, setNotAvailable] = useState(false);
   const [walletUser, setWalletUser] = useState(user);
   const [viewProfile, setViewProfile] = useState(profile);
+  const [viewBadges, setViewBadges] = useState(badges);
   const [dataNfts, setDataNfts] = useState(data);
   const [dataNftsHasNextPage, setDataNftsHasNextPage] = useState(dataHasNextPage);
   const [isLoading, setIsLoading] = useState(false);
@@ -79,6 +82,8 @@ const PublicProfilePage: React.FC<PublicProfileProps> = ({
         loadMore={loadMoreNfts}
         hasNextPage={dataNftsHasNextPage}
         loading={isLoading}
+        badges={viewBadges}
+        setBadges={setViewBadges}
       />
     </>
   );
@@ -88,6 +93,7 @@ export async function getServerSideProps(ctx: NextPageContext) {
   let user: UserType | null = null,
     profile: UserType | null = null,
     data: NftType[] = [],
+    badges: {nftId: string}[] | null = null,
     dataHasNextPage: boolean = false;
   const promises = [];
   if (token) {
@@ -102,6 +108,12 @@ export async function getServerSideProps(ctx: NextPageContext) {
       })
     );
   }
+  promises.push(new Promise<void>((success) => {
+    getBadges(ctx.query.name as string).then(_badges => {
+      badges = _badges
+      success();
+    }).catch(success);
+  }));
   promises.push(new Promise<void>((success) => {
     getProfile(ctx.query.name as string, token ? token : null).then(_profile => {
       profile = _profile
@@ -124,8 +136,10 @@ export async function getServerSideProps(ctx: NextPageContext) {
       },
     };
   }
+  console.log(badges)
+  
   return {
-    props: { user, profile, data, dataHasNextPage },
+    props: { user, profile, data, dataHasNextPage, badges },
   };
 }
 

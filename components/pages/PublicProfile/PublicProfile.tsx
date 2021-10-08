@@ -18,6 +18,8 @@ export interface PublicProfileProps {
   loadMore: () => void;
   hasNextPage: boolean;
   loading: boolean;
+  badges: any;
+  setBadges: (u: any) => void
 }
 
 const PublicProfile: React.FC<PublicProfileProps> = ({
@@ -31,6 +33,8 @@ const PublicProfile: React.FC<PublicProfileProps> = ({
   loadMore,
   hasNextPage,
   loading,
+  badges,
+  setBadges
 }) => {
   function returnNFTs() {
     return NFTS.map((item: NftType) => (
@@ -49,7 +53,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({
           alt="banner"
         />
       </div>
-      <Infos profile={profile} setProfile={setProfile} user={user} />
+      <Infos profile={profile} setProfile={setProfile} user={user} badges={badges}/>
         <div className={style.NFTWrapper}>{returnNFTs()}</div>
         {hasNextPage && (
           <>

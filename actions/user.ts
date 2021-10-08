@@ -21,6 +21,17 @@ export const getUser = async (token: string) => {
   return { ...userData, ...capsData };
 };
 
+export const getBadges = async (walletId: string) => {
+  const res = await fetch(
+    `${NODE_API_URL}/api/users/getBadges?walletId=${walletId}`
+  );
+
+  if (!res.ok) throw new Error();
+  const userData = await res.json();
+
+  return userData;
+}
+
 export const getProfile = async (id: string, walletIdViewer: string | null) => {
   const res = await fetch(
     `${NODE_API_URL}/api/users/${id}?incViews=${true}&walletIdViewer=${walletIdViewer}`
