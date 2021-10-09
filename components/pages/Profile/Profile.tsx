@@ -56,6 +56,9 @@ export interface ProfileProps {
   setFollowed: (users: UserType[]) => void;
   followedUsersHasNextPage: boolean;
   loadMoreFollowed: (forceLoad?: boolean)=>void;
+  // badges
+  badges: {data: []};
+  setBadges: (u: any) => void
 }
 
 const Profile: React.FC<ProfileProps> = ({
@@ -92,6 +95,7 @@ const Profile: React.FC<ProfileProps> = ({
   followedUsersHasNextPage,
   loadMoreFollowed,
   setFollowed,
+  badges
 }) => {
   const router = useRouter();
   const [scope, setScope] = useState(
@@ -517,6 +521,7 @@ const Profile: React.FC<ProfileProps> = ({
           likedAmount={user.likedNFTs?.length || 0}
           followersAmount={countFollowers}
           followedAmount={countFollowed}
+          badges={badges}
         />
         {returnCategory()}
       </div>

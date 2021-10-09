@@ -7,7 +7,7 @@ import Profile from 'components/pages/Profile';
 import NotAvailableModal from 'components/base/NotAvailable';
 import SuccessPopup from 'components/base/SuccessPopup';
 import cookies from 'next-cookies';
-import { getUser } from 'actions/user';
+import { getBadges, getUser } from 'actions/user';
 import { getOwnedNFTS, getCreatorNFTS } from 'actions/nft';
 import { getFollowers, getFollowed } from 'actions/follower';
 import { getLikedNFTs } from 'actions/user';
@@ -32,6 +32,7 @@ export interface ProfilePageProps {
   followed: UserType[];
   followedHasNextPage: boolean;
   loading: boolean;
+  badges: {data: []};
 }
 
 const ProfilePage: React.FC<ProfilePageProps> = ({
@@ -50,6 +51,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
   followersHasNextPage,
   followed,
   followedHasNextPage,
+  badges
 }) => {
   const [modalExpand, setModalExpand] = useState(false);
   const [notAvailable, setNotAvailable] = useState(false);
@@ -86,6 +88,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
   const [followedUsers, setFollowedUsers] = useState(followed);
   const [followedUsersHasNextPage, setFollowedUsersHasNextPage] = useState(followedHasNextPage);
   const [followedCurrentPage, setFollowedCurrentPage] = useState(1);
+  // profile
+  const [viewBadges, setViewBadges] = useState(badges)
 
   const loadMoreCreatedNfts = async () => {
     setIsLoading(true);
@@ -276,6 +280,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
         setNotAvailable={setNotAvailable}
         setSuccessPopup={setSuccessPopup}
         loading={isLoading}
+        badges={viewBadges}
+        setBadges={setViewBadges}
       />
     </>
   );
@@ -297,7 +303,8 @@ export async function getServerSideProps(ctx: NextPageContext) {
     followers: UserType[] = [],
     followersHasNextPage: boolean = false,
     followed: UserType[] = [],
-    followedHasNextPage: boolean = false;
+    followedHasNextPage: boolean = false,
+    badges: {nftId: string}[] | null = null;
   const promises = [];
   if (token) {
     promises.push(
@@ -310,6 +317,12 @@ export async function getServerSideProps(ctx: NextPageContext) {
           .catch(success);
       })
     );
+    promises.push(new Promise<void>((success) => {
+      getBadges(token).then(_badges => {
+        badges = _badges
+        success();
+      }).catch(success);
+    }));
     promises.push(
       new Promise<void>((success) => {
         getCreatorNFTS(token)
@@ -389,6 +402,7 @@ export async function getServerSideProps(ctx: NextPageContext) {
     );
   }
   await Promise.all(promises);
+  console.log(badges)
   if (!user) {
     return {
       redirect: {
@@ -414,6 +428,7 @@ export async function getServerSideProps(ctx: NextPageContext) {
       followersHasNextPage,
       followed,
       followedHasNextPage,
+      badges
     },
   };
 }

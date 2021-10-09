@@ -75,7 +75,16 @@
   font-size: 40px;
   line-height: 52px;
   margin: 0px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
 }
+
+// .Name.Badge{
+//   display: flex;
+//   justify-content: space-around;
+//   align-items: center;
+// }
 
 .Twitter {
   font-family: "Airbnb Cereal App Light";

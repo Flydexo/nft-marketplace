@@ -7,13 +7,13 @@ import gradient from 'random-gradient';
 import { middleEllipsis } from 'utils/strings';
 import { UserType } from 'interfaces';
 import { follow, unfollow, isUserFollowing, getFollowedCount, getFollowersCount } from 'actions/follower';
-import { NODE_API_URL } from 'utils/constant';
+import setBadges from 'utils/badges/setBadges';
 
 export interface InfosProps {
   profile: UserType;
   setProfile: (u: UserType) => void;
   user: UserType;
-  badges: any;
+  badges: {data: []};
 }
 
 
@@ -23,7 +23,7 @@ const Infos: React.FC<InfosProps> = ({ profile, setProfile, user, badges }) => {
   const [profileFollowersCount, setProfileFollowersCount] = useState(0)
   const [profileFollowedCount, setProfileFollowedCount] = useState(0)
   const bgGradient = profile ? { background: gradient(profile.name) } : {};
-  const [badgesImages, setBadgesImage] = useState([""]);
+  const [badgesImages, setBadgesImage] = useState<string[]>();
 
   const handleFollowUnfollow = async (isUnfollow:boolean=false) => {
     try {
@@ -54,30 +54,16 @@ const Infos: React.FC<InfosProps> = ({ profile, setProfile, user, badges }) => {
     }
   }
 
-  const setBadges = async () => {
-    new Promise((resolve) => {
-      badges.data.forEach(async (b: {nftId: String}, i: number) => {
-        const response = await fetch(`${NODE_API_URL}/api/NFTs/${b.nftId}`);
-        const result = await response.json();
-        badges.data[i] = {
-          nftId: b.nftId,
-          media: result.media.url
-        }
-        console.log(i, badges);
-        if(badges.data.length === i+1){
-          resolve("")
-        }
-      })
-    }).then(() => {
-      setBadgesImage(badges.data.map((b: any) => b.media));
-    })
-  }
+
+  useEffect(() => {
+    console.log("update", badgesImages)
+  }, [badgesImages])
+
 
   useEffect(() =>{
     if (profile && user && profile.walletId && user.walletId){
       getIsUserFollowingProfile()
     }
-    setBadges()
   }, [])
 
   const updateFollowersCount = async () => {
@@ -101,6 +87,7 @@ const Infos: React.FC<InfosProps> = ({ profile, setProfile, user, badges }) => {
   useEffect(()=>{
     updateFollowersCount()
     updateFollowedCount()
+    setBadges(badges, setBadgesImage)
   }, [profile])
 
   return (
@@ -124,7 +111,7 @@ const Infos: React.FC<InfosProps> = ({ profile, setProfile, user, badges }) => {
         </div>
         <div className={style.ContainerInner}>
           <div className={style.Left}>
-            <h1 className={style.Name}>{profile.name} {badgesImages[0]!="" ? badgesImages.map((b: any) => {
+            <h1 className={style.Name}>{profile.name} {badgesImages ? badgesImages.map((b: any) => {
               return <img key={b} src={b} width={50} height={50}></img>
             }) : ""}</h1>
             {profile.twitterName && (

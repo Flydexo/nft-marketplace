@@ -15,6 +15,7 @@ export type UserType = {
   tiimeAmount?: string;
   reviewRequested?:boolean
   likedNFTs?: { serieId: string, nftId: string }[];
+  badges?: {_id: string, walletId: string, emotes: {nftId: string, _id: string}[]}
 };
 
 export type NftType = {

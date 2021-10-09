@@ -11,6 +11,7 @@ import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
 
 import { UserType } from 'interfaces';
+import setBadges from 'utils/badges/setBadges';
 
 export interface SidebarProps {
   setScope: (s: string) => void;
@@ -24,7 +25,10 @@ export interface SidebarProps {
   unlistedOwnedAmount: number;
   followersAmount: number;
   followedAmount: number;
+  badges: {data: []};
 }
+
+const add = "/add.png"
 
 const Sidebar: React.FC<SidebarProps> = ({
   user,
@@ -37,14 +41,17 @@ const Sidebar: React.FC<SidebarProps> = ({
   listedOwnedAmount,
   unlistedOwnedAmount,
   followersAmount,
-  followedAmount
+  followedAmount,
+  badges
 }) => {
   const router = useRouter();
   const bgGradient = user ? { background: gradient(user.name) } : {};
   const [isRn, setIsRn] = useState(false)
+  const [badgesImages, setBadgesImages] = useState<string[]>([])
   
   useEffect(() => {
     setIsRn(window.isRNApp);
+    setBadges(badges, setBadgesImages)
   }, []);
 
   function returnActiveTitle(name: string) {
@@ -95,6 +102,12 @@ const Sidebar: React.FC<SidebarProps> = ({
         )}
 
         <h1 className={style.Name}>{user.name}</h1>
+        <div>
+          {badgesImages ? badgesImages.map((b: any) => {
+              return <img key={b} src={b} width={50} height={50}></img>
+            }) : ""}
+            {badgesImages ? badgesImages.length < 3 ? <img src={add} width={50} height={50}></img> : "" : ""}
+        </div>
         <div
           className={style.Address}
           onClick={() => {

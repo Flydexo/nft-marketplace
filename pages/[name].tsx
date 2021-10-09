@@ -18,7 +18,7 @@ export interface PublicProfileProps {
   profile: UserType;
   data: NftType[];
   dataHasNextPage: boolean;
-  badges: any
+  badges: []
 }
 
 const PublicProfilePage: React.FC<PublicProfileProps> = ({
@@ -37,6 +37,7 @@ const PublicProfilePage: React.FC<PublicProfileProps> = ({
   const [dataNftsHasNextPage, setDataNftsHasNextPage] = useState(dataHasNextPage);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
 
   const loadMoreNfts = async () => {
     setIsLoading(true);
@@ -90,16 +91,16 @@ const PublicProfilePage: React.FC<PublicProfileProps> = ({
 };
 export async function getServerSideProps(ctx: NextPageContext) {
   const token = cookies(ctx).token && decryptCookie(cookies(ctx).token as string);
+  console.log(token)
   let user: UserType | null = null,
     profile: UserType | null = null,
     data: NftType[] = [],
     badges: {nftId: string}[] | null = null,
     dataHasNextPage: boolean = false;
   const promises = [];
-  if (token) {
     promises.push(
       new Promise<void>((success) => {
-        getUser(token)
+        getUser(token as string)
           .then((_user) => {
             user = _user;
             success();
@@ -107,8 +108,8 @@ export async function getServerSideProps(ctx: NextPageContext) {
           .catch(success);
       })
     );
-  }
   promises.push(new Promise<void>((success) => {
+    console.log(ctx.query.name)
     getBadges(ctx.query.name as string).then(_badges => {
       badges = _badges
       success();
@@ -136,7 +137,6 @@ export async function getServerSideProps(ctx: NextPageContext) {
       },
     };
   }
-  console.log(badges)
   
   return {
     props: { user, profile, data, dataHasNextPage, badges },

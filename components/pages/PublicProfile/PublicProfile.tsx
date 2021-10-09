@@ -35,6 +35,8 @@ const PublicProfile: React.FC<PublicProfileProps> = ({
   loading,
   badges
 }) => {
+
+
   function returnNFTs() {
     return NFTS.map((item: NftType) => (
       <div key={item.id} className={style.NFTShell}>
