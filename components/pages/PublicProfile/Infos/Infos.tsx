@@ -16,14 +16,14 @@ export interface InfosProps {
   badges: any;
 }
 
+
 const Infos: React.FC<InfosProps> = ({ profile, setProfile, user, badges }) => {
   const [isUserFollowingProfile, setIsUserFollowingProfile] = useState<boolean | null>(null)
   const [followLoading, setFollowLoading] = useState(false)
   const [profileFollowersCount, setProfileFollowersCount] = useState(0)
   const [profileFollowedCount, setProfileFollowedCount] = useState(0)
-  const [badgesImages, setBadgesImages] = useState([""]);
   const bgGradient = profile ? { background: gradient(profile.name) } : {};
-
+  const [badgesImages, setBadgesImage] = useState([""]);
 
   const handleFollowUnfollow = async (isUnfollow:boolean=false) => {
     try {
@@ -55,14 +55,22 @@ const Infos: React.FC<InfosProps> = ({ profile, setProfile, user, badges }) => {
   }
 
   const setBadges = async () => {
-    setBadgesImages([]);
-    badges.data.forEach(async (b: {nftId: String}) => {
-      const response = await fetch(`${NODE_API_URL}/api/NFTs/${b.nftId}`);
-      const result = await response.json();
-      console.log(result.media.url)
-      setBadgesImages([result.media.url]);
+    new Promise((resolve, reject) => {
+      badges.data.forEach(async (b: {nftId: String}, i: number) => {
+        const response = await fetch(`${NODE_API_URL}/api/NFTs/${b.nftId}`);
+        const result = await response.json();
+        badges.data[i] = {
+          nftId: b.nftId,
+          media: result.media.url
+        }
+        console.log(i, badges);
+        if(badges.data.length === i+1){
+          resolve("")
+        }
+      })
+    }).then(() => {
+      setBadgesImage(badges.data.map((b: any) => b.media));
     })
-    console.log(badgesImages)
   }
 
   useEffect(() =>{
@@ -116,7 +124,9 @@ const Infos: React.FC<InfosProps> = ({ profile, setProfile, user, badges }) => {
         </div>
         <div className={style.ContainerInner}>
           <div className={style.Left}>
-            <h1 className={style.Name}>{profile.name} {badgesImages.map(b => <img src={b} width={50} height={50}></img>)}</h1>
+            <h1 className={style.Name}>{profile.name} {badgesImages[0]!="" ? badgesImages.map((b: any) => {
+              return <img key={b} src={b} width={50} height={50}></img>
+            }) : ""}</h1>
             {profile.twitterName && (
               <a href={"https://twitter.com/"+profile.twitterName.substring(1)} target="_blank" className={style.Twitter}>
                 <Twitter onClick={() => true} className={style.TwitterSVG} />
