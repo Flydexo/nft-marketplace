@@ -55,7 +55,7 @@ const Infos: React.FC<InfosProps> = ({ profile, setProfile, user, badges }) => {
   }
 
   const setBadges = async () => {
-    new Promise((resolve, reject) => {
+    new Promise((resolve) => {
       badges.data.forEach(async (b: {nftId: String}, i: number) => {
         const response = await fetch(`${NODE_API_URL}/api/NFTs/${b.nftId}`);
         const result = await response.json();
