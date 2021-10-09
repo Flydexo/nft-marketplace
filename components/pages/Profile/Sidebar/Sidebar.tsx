@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import style from './Sidebar.module.scss';
 import Badge from 'components/assets/badge';
 import CopyPaste from 'components/assets/copypaste';
@@ -12,6 +12,7 @@ import { useRouter } from 'next/router';
 
 import { UserType } from 'interfaces';
 import setBadges from 'utils/badges/setBadges';
+import BadgesContext from 'context/Badges';
 
 export interface SidebarProps {
   setScope: (s: string) => void;
@@ -47,14 +48,18 @@ const Sidebar: React.FC<SidebarProps> = ({
   const bgGradient = user ? { background: gradient(user.name) } : {};
   const [isRn, setIsRn] = useState(false)
   const [badgesImages, setBadgesImages] = useState<string[]>([])
+  badges = useContext(BadgesContext);
   
   useEffect(() => {
     setIsRn(window.isRNApp);
-    console.log(badges)
+    console.log("sidebar update")
+  }, []);
+
+  useEffect(() => {
     if(badges){
       setBadges(badges, setBadgesImages)
     }
-  }, []);
+  }, [badges])
 
   function returnActiveTitle(name: string) {
     if (scope === name) {

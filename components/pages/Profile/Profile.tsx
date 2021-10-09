@@ -14,6 +14,7 @@ import Switch from 'react-switch';
 import { NftType, UserType } from 'interfaces';
 import { follow, unfollow, isUserFollowing, getFollowersCount } from 'actions/follower';
 import { getUserNFTsStat } from 'actions/nft';
+import BadgesContext from '../../../context/Badges';
 
 export interface ProfileProps {
   setModalExpand: (b: boolean) => void;
@@ -504,6 +505,7 @@ const Profile: React.FC<ProfileProps> = ({
   }
 
   return (
+    <BadgesContext.Provider value={badges}>
     <div className={style.Container}>
       <div className={style.Banner}>
         <img
@@ -550,6 +552,7 @@ const Profile: React.FC<ProfileProps> = ({
         <TwitterErrorModal setModalExpand={setTwitterErrorModal} />
       )}
     </div>
+    </BadgesContext.Provider>
   );
 };
 

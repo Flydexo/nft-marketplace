@@ -127,9 +127,7 @@ const Edit: React.FC<EditProps> = ({ user, setBanner, setSuccessPopup, badges, o
       const res = await removeBadge(user.walletId, id);
       if(!res.error){
         const newBadges = await getBadges(user.walletId);
-        console.log(newBadges)
         await setBadges(newBadges, setBadgesImages)
-        console.log("lol", badgesImages)
         setStateBadges(newBadges)
       }
     }
@@ -257,7 +255,6 @@ const Edit: React.FC<EditProps> = ({ user, setBanner, setSuccessPopup, badges, o
               {badgesImages && badges ? 
                 badgesImages.length >= 1 && badges.data.length >= 1 ? 
                   badgesImages.map((b: string, i: number) => {
-                    console.log("i", i, badges, badgesImages)
                     return <EmoteBadge img={b} id={badges.data[i].nftId} key={badges.data[i].nftId} handle={() => handleDeleteBadge(badges.data[i].nftId)}/>
                   })
                  : ""

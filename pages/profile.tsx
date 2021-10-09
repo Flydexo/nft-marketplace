@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useState } from 'react';
 import Head from 'next/head';
 import AlphaBanner from 'components/base/AlphaBanner';
 import MainHeader from 'components/base/MainHeader';
@@ -234,12 +234,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
     }
   };
 
-  useEffect(() => {
-    console.log(viewBadges)
-  }, [viewBadges])
 
   function hadleChangeBadges(badges:any){
-    console.log(badges, viewBadges)
     setViewBadges(badges)
   }
 
@@ -429,7 +425,6 @@ export async function getServerSideProps(ctx: NextPageContext) {
         };
       }
   
-      console.log(badges)
       let removed: boolean = false;
       if(badges && badges.data){
         await asyncForEach(badges.data, async (b: {nftId: string}) => {
@@ -439,7 +434,6 @@ export async function getServerSideProps(ctx: NextPageContext) {
           }
         })
         if(removed){
-          console.log("removed")
           let nbadges = await getBadges(token as string);
           badges = nbadges.error ? null : nbadges;
         }
