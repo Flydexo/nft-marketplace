@@ -32,6 +32,38 @@ export const getBadges = async (walletId: string) => {
   return userData;
 }
 
+export const setBadge = async (walletId: string, emoteId: string) => {
+  console.log(walletId, emoteId)
+  const res = await fetch(`${NODE_API_URL}/api/users/addBadgeToUser`, {
+    method: 'POST',
+    body: JSON.stringify({walletId, emoteId}),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+
+  if (!res.ok) throw new Error();
+  const userData = await res.json();
+
+  return userData;
+}
+
+export const removeBadge = async (walletId: string, emoteId: string) => {
+  console.log(walletId, emoteId)
+  const res = await fetch(`${NODE_API_URL}/api/users/removeBadgeFromUser`, {
+    method: 'POST',
+    body: JSON.stringify({walletId, emoteId}),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+
+  if (!res.ok) throw new Error();
+  const userData = await res.json();
+
+  return userData;
+}
+
 export const getProfile = async (id: string, walletIdViewer: string | null) => {
   const res = await fetch(
     `${NODE_API_URL}/api/users/${id}?incViews=${true}&walletIdViewer=${walletIdViewer}`

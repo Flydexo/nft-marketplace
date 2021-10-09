@@ -28,7 +28,6 @@ export interface SidebarProps {
   badges: {data: []};
 }
 
-const add = "/add.png"
 
 const Sidebar: React.FC<SidebarProps> = ({
   user,
@@ -106,7 +105,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           {badgesImages ? badgesImages.map((b: any) => {
               return <img key={b} src={b} width={50} height={50}></img>
             }) : ""}
-            {badgesImages ? badgesImages.length < 3 ? <img src={add} width={50} height={50}></img> : "" : ""}
         </div>
         <div
           className={style.Address}

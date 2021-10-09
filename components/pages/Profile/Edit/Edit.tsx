@@ -1,22 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import style from './Edit.module.scss';
 import Badge from 'components/assets/badge';
 import gradient from 'random-gradient';
-import { UserType } from 'interfaces';
+import { NftType, UserType } from 'interfaces';
 import { validateTwitter, validateUrl } from 'utils/strings';
 import ModalEdit from '../ModalEdit/ModalEdit';
-import { reviewRequested } from 'actions/user';
+import { getBadges, removeBadge, reviewRequested, setBadge } from 'actions/user';
 import { uploadIPFS } from 'utils/nftEncryption';
 import { MARKETPLACE_ID, NODE_API_URL } from 'utils/constant';
+import setBadges from '../../../../utils/badges/setBadges';
+import EmoteBadge from '../../../base/EmoteBadge/EmoteBadge';
+const add = "/add.png"
 
 export interface EditProps {
   user: UserType;
   setBanner: (s: string) => void;
   setSuccessPopup: (b: boolean) => void;
+  badges: {data: any[]};
+  setStateBadges: (u: any) => void;
+  ownedNFTs: NftType[];
+  goBack: (u: any) => void;
 }
 
-const Edit: React.FC<EditProps> = ({ user, setBanner, setSuccessPopup }) => {
+const Edit: React.FC<EditProps> = ({ user, setBanner, setSuccessPopup, badges, ownedNFTs, setStateBadges, goBack }) => {
   const bgGradient = user ? { background: gradient(user.name) } : {};
+  const [badgesImages, setBadgesImages] = useState<string[]>([])
   const [data, setData] = useState({
     walletId: user.walletId,
     name: user.name,
@@ -30,7 +38,9 @@ const Edit: React.FC<EditProps> = ({ user, setBanner, setSuccessPopup }) => {
     reviewRequested: user.reviewRequested,
     verified: user.verified
   });
+  const [isAddingBadge, setIsAddingBadge] = useState<boolean>(false);
   const [modalEditOpen, setModalEditOpen] = useState(false)
+  
   const isDataValid = (
     data && 
     data.name &&
@@ -84,6 +94,35 @@ const Edit: React.FC<EditProps> = ({ user, setBanner, setSuccessPopup }) => {
       console.error(error);
     }
   }
+  
+  useEffect(() => {
+    setBadges(badges, setBadgesImages)
+  }, [data])
+
+  async function handleSelectNewBadge(id: string){
+    if(!badges.data.map(d => d.nftId).includes(id) && badges.data.length < 3){
+      const res = await setBadge(user.walletId, id);
+      if(!res.error){
+        const newBadges = await getBadges(user.walletId);
+        setStateBadges(newBadges)
+        await setBadges(newBadges, setBadgesImages)
+      }
+    }
+  }
+
+  async function handleDeleteBadge(id: string){
+    if(badges.data.map(d => d.nftId).includes(id)){
+      const res = await removeBadge(user.walletId, id);
+      if(!res.error){
+        const newBadges = await getBadges(user.walletId);
+        console.log(newBadges)
+        await setBadges(newBadges, setBadgesImages)
+        console.log("lol", badgesImages)
+        setStateBadges(newBadges)
+      }
+    }
+  }
+
   return (
     <>
       <div className={style.EditContainer}>
@@ -201,6 +240,31 @@ const Edit: React.FC<EditProps> = ({ user, setBanner, setSuccessPopup }) => {
                 />
               </div>
             </label>
+
+            <div className={style.EditBadges}>
+              {badgesImages && badges ? 
+                badgesImages.length >= 1 && badges.data.length >= 1 ? 
+                  badgesImages.map((b: string, i: number) => {
+                    console.log("i", i, badges, badgesImages)
+                    return <EmoteBadge img={b} id={badges.data[i].nftId} key={badges.data[i].nftId} handle={() => handleDeleteBadge(badges.data[i].nftId)}/>
+                  })
+                 : ""
+               : ""}
+              {badgesImages ? badgesImages.length < 3 ? <div className={style.AddBadge} onClick={() => setIsAddingBadge(!isAddingBadge)}>
+                <img src={add} alt="add Badge" width={30}/> 
+              </div> : "" : ""}
+            </div>
+            {isAddingBadge ? <div className={style.SelectBadge}>{
+                ownedNFTs.map(nft => {
+                  return <img src={nft.media.url} alt={nft.id} width={50} onClick={() => handleSelectNewBadge(nft.id)} key={nft.id}/>
+                })
+            }</div> : ""}
+
+            <div className={style.BadgesButton}>
+              <div className={`${style.Button}`} onClick={goBack}>
+                Update your badges
+              </div>
+            </div>
 
             {data.verified ?
               <div className={style.Certification}>

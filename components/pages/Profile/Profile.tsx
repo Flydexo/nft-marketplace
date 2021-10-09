@@ -95,7 +95,8 @@ const Profile: React.FC<ProfileProps> = ({
   followedUsersHasNextPage,
   loadMoreFollowed,
   setFollowed,
-  badges
+  badges,
+  setBadges
 }) => {
   const router = useRouter();
   const [scope, setScope] = useState(
@@ -352,6 +353,10 @@ const Profile: React.FC<ProfileProps> = ({
           user={user}
           setBanner={setBanner}
           setSuccessPopup={setSuccessPopup}
+          badges={badges}
+          setStateBadges={setBadges}
+          ownedNFTs={ownedNFTS}
+          goBack={() => setScope("My NFTs")}
         />
       );
     } else {

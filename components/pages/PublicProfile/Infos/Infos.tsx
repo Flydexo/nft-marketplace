@@ -55,9 +55,7 @@ const Infos: React.FC<InfosProps> = ({ profile, setProfile, user, badges }) => {
   }
 
 
-  useEffect(() => {
-    console.log("update", badgesImages)
-  }, [badgesImages])
+
 
 
   useEffect(() =>{
@@ -87,7 +85,10 @@ const Infos: React.FC<InfosProps> = ({ profile, setProfile, user, badges }) => {
   useEffect(()=>{
     updateFollowersCount()
     updateFollowedCount()
-    setBadges(badges, setBadgesImage)
+    if(badges){
+      console.log(badges)
+      setBadges(badges, setBadgesImage)
+    }
   }, [profile])
 
   return (

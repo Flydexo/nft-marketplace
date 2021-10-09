@@ -95,7 +95,7 @@ export async function getServerSideProps(ctx: NextPageContext) {
   let user: UserType | null = null,
     profile: UserType | null = null,
     data: NftType[] = [],
-    badges: {nftId: string}[] | null = null,
+    badges: {nftId: string, error?: string}[] | null = null,
     dataHasNextPage: boolean = false;
   const promises = [];
     promises.push(
@@ -111,7 +111,7 @@ export async function getServerSideProps(ctx: NextPageContext) {
   promises.push(new Promise<void>((success) => {
     console.log(ctx.query.name)
     getBadges(ctx.query.name as string).then(_badges => {
-      badges = _badges
+      badges = _badges.error ? null : _badges
       success();
     }).catch(success);
   }));
@@ -137,6 +137,8 @@ export async function getServerSideProps(ctx: NextPageContext) {
       },
     };
   }
+
+  console.log(badges)
   
   return {
     props: { user, profile, data, dataHasNextPage, badges },

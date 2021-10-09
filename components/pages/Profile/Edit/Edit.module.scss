@@ -379,3 +379,62 @@
     margin-top: 32px;
   }
 }
+
+.EditBadges{
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 210px;
+  margin: 50px 0 20px 0;
+  user-select: none;
+}
+
+.AddBadge{
+  position: relative;
+  background-color: $primary;
+  border-radius: 100%;
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.SelectBadge{
+  margin: 20px 0;
+  width: 100%;
+  height: max-content;
+  max-height: 500px;
+  background-color: #0C0B0B;
+  border-radius: 15px;
+  padding: 20px 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  place-items: center;
+  column-gap: 10px;
+  row-gap: 10px;
+  overflow-y: auto;
+  img{
+    cursor: pointer;
+    &:hover{
+      transform: scale(1.1);
+    }
+  }
+  &::-webkit-scrollbar{
+    width: 10px;
+    padding: 10px 0;
+  }
+  &::-webkit-scrollbar-thumb{
+    width: 10px;
+    height: 30px;
+    border-radius: 5px;
+    background-color: $primary;
+  }
+}
+
+.BadgesButton{
+  width: 210px;
+  display: grid;
+  place-items: center;
+  margin-top: 10px;
+}

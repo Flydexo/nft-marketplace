@@ -1,0 +1,25 @@
+.EmoteBadge{
+    position: relative;
+    background-color: #e0e0e0;
+    border-radius: 100%;
+    width: 60px;
+    height: 60px;
+    display: grid;
+    place-items: center;
+}
+
+.Cross{
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+    color: #fff;
+    font-family: "Airbnb Cereal App Bold";
+    background-color: #FF0000;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    top: -17px;
+    right: -10px;
+    cursor: pointer;
+}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import AlphaBanner from 'components/base/AlphaBanner';
 import MainHeader from 'components/base/MainHeader';
@@ -233,6 +233,15 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
     }
   };
 
+  useEffect(() => {
+    console.log(viewBadges)
+  }, [viewBadges])
+
+  function hadleChangeBadges(badges:any){
+    console.log(badges, viewBadges)
+    setViewBadges(badges)
+  }
+
   return (
     <>
       <Head>
@@ -281,7 +290,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
         setSuccessPopup={setSuccessPopup}
         loading={isLoading}
         badges={viewBadges}
-        setBadges={setViewBadges}
+        setBadges={hadleChangeBadges}
       />
     </>
   );
