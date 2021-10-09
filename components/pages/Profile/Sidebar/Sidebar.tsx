@@ -50,7 +50,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   
   useEffect(() => {
     setIsRn(window.isRNApp);
-    setBadges(badges, setBadgesImages)
+    if(badges){
+      setBadges(badges, setBadgesImages)
+    }
   }, []);
 
   function returnActiveTitle(name: string) {

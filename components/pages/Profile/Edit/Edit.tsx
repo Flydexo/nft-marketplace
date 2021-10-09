@@ -96,11 +96,23 @@ const Edit: React.FC<EditProps> = ({ user, setBanner, setSuccessPopup, badges, o
   }
   
   useEffect(() => {
-    setBadges(badges, setBadgesImages)
+    if(badges){
+      setBadges(badges, setBadgesImages)
+    }
   }, [data])
 
   async function handleSelectNewBadge(id: string){
-    if(!badges.data.map(d => d.nftId).includes(id) && badges.data.length < 3){
+    if(badges){
+      if(!badges.data.map(d => d.nftId).includes(id) && badges.data.length < 3){
+        const res = await setBadge(user.walletId, id);
+        if(!res.error){
+          const newBadges = await getBadges(user.walletId);
+          setStateBadges(newBadges)
+          await setBadges(newBadges, setBadgesImages)
+        }
+      }
+    }else{
+      console.log('else')
       const res = await setBadge(user.walletId, id);
       if(!res.error){
         const newBadges = await getBadges(user.walletId);

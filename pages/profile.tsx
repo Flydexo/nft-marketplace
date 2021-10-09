@@ -7,7 +7,7 @@ import Profile from 'components/pages/Profile';
 import NotAvailableModal from 'components/base/NotAvailable';
 import SuccessPopup from 'components/base/SuccessPopup';
 import cookies from 'next-cookies';
-import { getBadges, getUser } from 'actions/user';
+import { getBadges, getUser, removeBadge } from 'actions/user';
 import { getOwnedNFTS, getCreatorNFTS } from 'actions/nft';
 import { getFollowers, getFollowed } from 'actions/follower';
 import { getLikedNFTs } from 'actions/user';
@@ -314,132 +314,145 @@ export async function getServerSideProps(ctx: NextPageContext) {
     followed: UserType[] = [],
     followedHasNextPage: boolean = false,
     badges: {nftId: string}[] | null = null;
-  const promises = [];
-  if (token) {
-    promises.push(
-      new Promise<void>((success) => {
-        getUser(token)
-          .then((_user) => {
-            user = _user;
-            success();
-          })
-          .catch(success);
-      })
-    );
-    promises.push(new Promise<void>((success) => {
-      getBadges(token).then(_badges => {
-        badges = _badges
-        success();
-      }).catch(success);
-    }));
-    promises.push(
-      new Promise<void>((success) => {
-        getCreatorNFTS(token)
-          .then((result) => {
-            created = result.data;
-            createdHasNextPage = result.hasNextPage || false;
-            success();
-          })
-          .catch(success);
-      })
-    );
-    promises.push(
-      new Promise<void>((success) => {
-        getOwnedNFTS(token, false)
-          .then((result) => {
-            owned = result.data;
-            ownedHasNextPage = result.hasNextPage || false;
-            success();
-          })
-          .catch(success);
-      })
-    );
-    promises.push(
-      new Promise<void>((success) => {
-        getOwnedNFTS(token, true, 1)
-          .then((result) => {
-            ownedListed = result.data;
-            ownedListedHasNextPage = result.hasNextPage || false;
-            success();
-          })
-          .catch(success);
-      })
-    );
-    promises.push(
-      new Promise<void>((success) => {
-        getOwnedNFTS(token, false, 0)
-          .then((result) => {
-            ownedUnlisted = result.data;
-            ownedUnlistedHasNextPage = result.hasNextPage || false;
-            success();
-          })
-          .catch(success);
-      })
-    );
-    promises.push(
-      new Promise<void>((success) => {
-        getLikedNFTs(token)
-          .then((result) => {
-            liked = result.data;
-            likedHasNextPage = result.hasNextPage || false;
-            success();
-          })
-          .catch(success);
-      })
-    );
-    promises.push(
-      new Promise<void>((success) => {
-        getFollowers(token)
-          .then((result) => {
-            followers = result.data;
-            followersHasNextPage = result.hasNextPage || false;
-            success();
-          })
-          .catch(success);
-      })
-    );
-    promises.push(
-      new Promise<void>((success) => {
-        getFollowed(token)
-          .then((result) => {
-            followed = result.data;
-            followedHasNextPage = result.hasNextPage || false;
-            success();
-          })
-          .catch(success);
-      })
-    );
-  }
-  await Promise.all(promises);
-  console.log(badges)
-  if (!user) {
+    const promises = [];
+    if (token) {
+      promises.push(
+        new Promise<void>((success) => {
+          getUser(token)
+            .then((_user) => {
+              user = _user;
+              success();
+            })
+            .catch(success);
+        })
+      );
+      promises.push(
+        new Promise<void>((success) => {
+          getCreatorNFTS(token)
+            .then((result) => {
+              created = result.data;
+              createdHasNextPage = result.hasNextPage || false;
+              success();
+            })
+            .catch(success);
+        })
+      );
+      promises.push(
+        new Promise<void>((success) => {
+          getOwnedNFTS(token, false)
+            .then((result) => {
+              owned = result.data;
+              ownedHasNextPage = result.hasNextPage || false;
+              success();
+            })
+            .catch(success);
+        })
+      );
+      promises.push(
+        new Promise<void>((success) => {
+          getOwnedNFTS(token, true, 1)
+            .then((result) => {
+              ownedListed = result.data;
+              ownedListedHasNextPage = result.hasNextPage || false;
+              success();
+            })
+            .catch(success);
+        })
+      );
+      promises.push(
+        new Promise<void>((success) => {
+          getOwnedNFTS(token, false, 0)
+            .then((result) => {
+              ownedUnlisted = result.data;
+              ownedUnlistedHasNextPage = result.hasNextPage || false;
+              success();
+            })
+            .catch(success);
+        })
+      );
+      promises.push(
+        new Promise<void>((success) => {
+          getLikedNFTs(token)
+            .then((result) => {
+              liked = result.data;
+              likedHasNextPage = result.hasNextPage || false;
+              success();
+            })
+            .catch(success);
+        })
+      );
+      promises.push(
+        new Promise<void>((success) => {
+          getFollowers(token)
+            .then((result) => {
+              followers = result.data;
+              followersHasNextPage = result.hasNextPage || false;
+              success();
+            })
+            .catch(success);
+        })
+      );
+      promises.push(
+        new Promise<void>((success) => {
+          getFollowed(token)
+            .then((result) => {
+              followed = result.data;
+              followedHasNextPage = result.hasNextPage || false;
+              success();
+            })
+            .catch(success);
+        })
+      );
+      promises.push(new Promise<void>((success) => {
+        getBadges(token).then(_badges => {
+          if(!_badges.error){
+            let removed: boolean = false;
+            _badges.forEach((b: {nftId: string}) => {
+              if(!owned.map(n => n.id).includes(b.nftId)){
+                removeBadge(token, b.nftId)
+                removed = true;
+              }
+            })
+            if(removed){
+              getBadges(token).then(_badges => {
+                badges = _badges.error ? null : _badges;
+              }).catch(success);
+            }
+          }
+          badges = _badges
+          success();
+        }).catch(success);
+      }));
+    }
+    await Promise.all(promises);
+    if (!user) {
+      return {
+        redirect: {
+          permanent: false,
+          destination: '/',
+        },
+      };
+    }
     return {
-      redirect: {
-        permanent: false,
-        destination: '/',
+      props: {
+        user,
+        created,
+        createdHasNextPage,
+        owned,
+        ownedHasNextPage,
+        ownedListed,
+        ownedListedHasNextPage,
+        ownedUnlisted,
+        ownedUnlistedHasNextPage,
+        liked,
+        likedHasNextPage,
+        followers,
+        followersHasNextPage,
+        followed,
+        followedHasNextPage,
+        badges
       },
     };
-  }
-  return {
-    props: {
-      user,
-      created,
-      createdHasNextPage,
-      owned,
-      ownedHasNextPage,
-      ownedListed,
-      ownedListedHasNextPage,
-      ownedUnlisted,
-      ownedUnlistedHasNextPage,
-      liked,
-      likedHasNextPage,
-      followers,
-      followersHasNextPage,
-      followed,
-      followedHasNextPage,
-      badges
-    },
-  };
 }
 
 export default ProfilePage;
