@@ -33,7 +33,6 @@ export const getBadges = async (walletId: string) => {
 }
 
 export const setBadge = async (walletId: string, emoteId: string) => {
-  console.log(walletId, emoteId)
   const res = await fetch(`${NODE_API_URL}/api/users/addBadgeToUser`, {
     method: 'POST',
     body: JSON.stringify({walletId, emoteId}),
@@ -49,7 +48,6 @@ export const setBadge = async (walletId: string, emoteId: string) => {
 }
 
 export const removeBadge = async (walletId: string, emoteId: string) => {
-  console.log(walletId, emoteId)
   const res = await fetch(`${NODE_API_URL}/api/users/removeBadgeFromUser`, {
     method: 'POST',
     body: JSON.stringify({walletId, emoteId}),

@@ -90,6 +90,7 @@ const PublicProfilePage: React.FC<PublicProfileProps> = ({
   );
 };
 export async function getServerSideProps(ctx: NextPageContext) {
+  console.log('{name}')
   const token = cookies(ctx).token && decryptCookie(cookies(ctx).token as string);
   console.log(token)
   let user: UserType | null = null,
@@ -98,6 +99,7 @@ export async function getServerSideProps(ctx: NextPageContext) {
     badges: {nftId: string, error?: string}[] | null = null,
     dataHasNextPage: boolean = false;
   const promises = [];
+  if(token){
     promises.push(
       new Promise<void>((success) => {
         getUser(token as string)
@@ -108,6 +110,7 @@ export async function getServerSideProps(ctx: NextPageContext) {
           .catch(success);
       })
     );
+  }
   promises.push(new Promise<void>((success) => {
     console.log(ctx.query.name)
     getBadges(ctx.query.name as string).then(_badges => {
@@ -129,6 +132,7 @@ export async function getServerSideProps(ctx: NextPageContext) {
     }).catch(success);
   }));
   await Promise.all(promises)
+  console.log(user)
   if (!profile) {
     return {
       redirect: {

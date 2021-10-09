@@ -14,6 +14,7 @@ import { getLikedNFTs } from 'actions/user';
 import { NftType, UserType } from 'interfaces';
 import { NextPageContext } from 'next';
 import { decryptCookie } from 'utils/cookie';
+import asyncForEach from 'utils/asyncForeach';
 
 export interface ProfilePageProps {
   user: UserType;
@@ -298,7 +299,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
 
 export async function getServerSideProps(ctx: NextPageContext) {
   const token = cookies(ctx).token && decryptCookie(cookies(ctx).token as string);
-  let user = null,
+  let user : {} | null = null,
     created: NftType[] = [],
     createdHasNextPage: boolean = false,
     owned: NftType[] = [],
@@ -313,7 +314,7 @@ export async function getServerSideProps(ctx: NextPageContext) {
     followersHasNextPage: boolean = false,
     followed: UserType[] = [],
     followedHasNextPage: boolean = false,
-    badges: {nftId: string}[] | null = null;
+    badges: {error?: string, data?: {nftId: string}[]} | null = null;
     const promises = [];
     if (token) {
       promises.push(
@@ -403,56 +404,67 @@ export async function getServerSideProps(ctx: NextPageContext) {
             .catch(success);
         })
       );
-      promises.push(new Promise<void>((success) => {
-        getBadges(token).then(_badges => {
-          if(!_badges.error){
-            let removed: boolean = false;
-            _badges.forEach((b: {nftId: string}) => {
-              if(!owned.map(n => n.id).includes(b.nftId)){
-                removeBadge(token, b.nftId)
-                removed = true;
-              }
-            })
-            if(removed){
-              getBadges(token).then(_badges => {
-                badges = _badges.error ? null : _badges;
-              }).catch(success);
+      promises.push(
+        new Promise<void>((success) => {
+          getBadges(token).then(async (_badges: {error?: string, data?: {nftId: string}[]}) => {
+            if(_badges.error === undefined && _badges.data !== undefined){
+              badges = _badges
+              success();
+            }else{
+              badges = null;
+              success();
             }
-          }
-          badges = _badges
-          success();
-        }).catch(success);
-      }));
+            success();
+          }).catch(success);
+        })
+      );
     }
-    await Promise.all(promises);
-    if (!user) {
+    return Promise.all(promises).then(async () => {
+      if (!user) {
+        return {
+          redirect: {
+            permanent: false,
+            destination: '/',
+          },
+        };
+      }
+  
+      console.log(badges)
+      let removed: boolean = false;
+      if(badges && badges.data){
+        await asyncForEach(badges.data, async (b: {nftId: string}) => {
+          if(!owned.map(n => n.id).includes(b.nftId)){
+              await removeBadge(token as string, b.nftId)
+              removed = true;
+          }
+        })
+        if(removed){
+          console.log("removed")
+          let nbadges = await getBadges(token as string);
+          badges = nbadges.error ? null : nbadges;
+        }
+      }
       return {
-        redirect: {
-          permanent: false,
-          destination: '/',
+        props: {
+          user,
+          created,
+          createdHasNextPage,
+          owned,
+          ownedHasNextPage,
+          ownedListed,
+          ownedListedHasNextPage,
+          ownedUnlisted,
+          ownedUnlistedHasNextPage,
+          liked,
+          likedHasNextPage,
+          followers,
+          followersHasNextPage,
+          followed,
+          followedHasNextPage,
+          badges
         },
       };
-    }
-    return {
-      props: {
-        user,
-        created,
-        createdHasNextPage,
-        owned,
-        ownedHasNextPage,
-        ownedListed,
-        ownedListedHasNextPage,
-        ownedUnlisted,
-        ownedUnlistedHasNextPage,
-        liked,
-        likedHasNextPage,
-        followers,
-        followersHasNextPage,
-        followed,
-        followedHasNextPage,
-        badges
-      },
-    };
+    })
 }
 
 export default ProfilePage;
