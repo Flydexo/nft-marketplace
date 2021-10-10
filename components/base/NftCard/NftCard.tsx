@@ -10,6 +10,7 @@ import { computeCaps, computeTiime } from 'utils/strings';
 import { likeNFT, unlikeNFT } from 'actions/user';
 import { getNFT } from 'actions/nft';
 import { MARKETPLACE_ID } from 'utils/constant';
+const starImage = "/star_white.png"
 
 export interface NftCardProps {
   item: NftType;
@@ -124,6 +125,8 @@ const NftCard: React.FC<NftCardProps> = ({
     }
   }
 
+  console.log(item)
+
   return (
     <div
       onClick={() => !isDragging && Router.push(`/nft/${item.id}`)}
@@ -146,7 +149,7 @@ const NftCard: React.FC<NftCardProps> = ({
         {displayQuantity()}
       </span>}
       {item.cryptedMedia?.url !== item.media?.url && !isHovering && (
-        <span className={style.SecretLabel}>S</span>
+        <span className={style.SecretLabel}>{item.average} <img src={starImage} alt="star" width={20} className={style.StarNFT}/></span>
       )}
       <div
         className={

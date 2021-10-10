@@ -153,7 +153,8 @@ const NFTPage: React.FC<NFTPageProps> = ({
 
 
   useEffect(() => {
-    getComments(NFT.id, setComments).then(page => setPage(page))
+    console.log("useeffect")
+    getComments(NFT.id, setComments).then(page => setPage(page != 0 ? page : 1))
     getAverageRate(NFT.id).then(r => setAverage(r.average.toFixed(1)))
   }, [])
 
@@ -178,12 +179,14 @@ const NFTPage: React.FC<NFTPageProps> = ({
     setRated(false)
     setMessage("Comment added")
     setTimeout(() => {
+      console.log("timeout")
       getComments(NFT.id, setComments, page, comments).then(page => setPage(page))
     }, 1000)
   }
 
   const handleLoad = () => {
     console.log("load", page)
+    console.log("load")
     getComments(NFT.id, setComments, comments.length < page*5 ? page : page+1, comments).then(page => setPage(page))
   }
 

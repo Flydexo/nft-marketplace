@@ -42,6 +42,7 @@ export type NftType = {
   categories: CategoryType[];
   viewsCount?: number;
   marketplaceId?: string;
+  average?: number;
 };
 
 export type CategoryType = {
