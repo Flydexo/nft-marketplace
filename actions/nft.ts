@@ -55,3 +55,35 @@ export const getUserNFTsStat = async (id: string, onlyFromMpId: boolean): Promis
   let result = await res.json()
   return result;
 };
+
+export const addComment = async (id: string, walletId: string, text: string, note: number) =>{
+  console.log(!isNaN(note))
+  if(text.length <= 240){
+    const res = await fetch(`${NODE_API_URL}/api/NFTs/addComment/${id}`, {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        walletId: walletId,
+        note: note,
+        text: text
+      })
+    });
+    if (!res.ok) throw new Error('error adding comment');
+    let result = await res.json();
+    console.log(result, JSON.stringify({
+      walletId: walletId,
+      note: note,
+      text: text
+    }))
+    return result;
+  }
+}
+
+export const getAverageRate = async (id: string) => {
+  const res = await fetch(`${NODE_API_URL}/api/NFTs/getAverageRate/${id}`);
+  if (!res.ok) throw new Error('error fetching average rate');
+  let result = await res.json()
+  return result;
+}

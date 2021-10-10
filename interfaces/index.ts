@@ -63,3 +63,21 @@ export type CustomResponse<DataType> = {
   hasPreviousPage: boolean;
   data: DataType[]
 }
+
+export type Comment = {
+  _id: string;
+  nftId: string;
+  author: string;
+  note: number;
+  text: string;
+}
+
+export type FullComment = {
+  _id: string;
+  nftId: string;
+  author: string;
+  note: number;
+  text: string;
+  authorName: string;
+  authorPicture: string;
+}

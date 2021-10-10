@@ -8,7 +8,7 @@ import Share from 'components/assets/share';
 import Like from 'components/assets/heart';
 import Eye from 'components/assets/eye';
 import { computeCaps, computeTiime } from 'utils/strings';
-import { UserType, NftType } from 'interfaces';
+import { UserType, NftType, FullComment } from 'interfaces';
 import { likeNFT, unlikeNFT } from 'actions/user';
 import ModalShare from 'components/base/ModalShare';
 import NoNFTImage from '../../assets/NoNFTImage';
@@ -16,6 +16,10 @@ import gradient from 'random-gradient';
 import Details from './Details';
 import Creator from 'components/base/Creator';
 import { MARKETPLACE_ID } from 'utils/constant';
+import getComments from 'utils/comments/setComments';
+import { addComment, getAverageRate } from 'actions/nft';
+const starImage = "/star.png"
+const emptyStarImage = "/empty_star.png"
 
 export interface NFTPageProps {
   NFT: NftType;
@@ -48,6 +52,13 @@ const NFTPage: React.FC<NFTPageProps> = ({
       ? process.env.NEXT_PUBLIC_APP_LINK
       : 'secret-nft.com'
   }`;
+  const [comments, setComments] = useState<FullComment[]>([]);
+  const [rate, setRate] = useState<number>(0);
+  const [rated, setRated] = useState(false);
+  const [page, setPage] = useState<number>(0);
+  const [comment, setComment] = useState("");
+  const [message, setMessage] = useState<null|string>(null);
+  const [average, setAverage] = useState<number>(0);
   const shareUrl =
     (typeof window !== 'undefined' && window.location?.href) ||
     `https://www.${
@@ -140,6 +151,42 @@ const NFTPage: React.FC<NFTPageProps> = ({
     setExp(2)
   }
 
+
+  useEffect(() => {
+    getComments(NFT.id, setComments).then(page => setPage(page))
+    getAverageRate(NFT.id).then(r => setAverage(r.average.toFixed(1)))
+  }, [])
+
+  const handleRate = () => {
+    setRated(true)
+    setMessage(null)
+  }
+
+  const handleSubmit = () => {
+    console.log("submit")
+    addComment(NFT.id, user.walletId, comment, rate);
+    if(comments.length > 5) setPage(page+1) 
+    setComments([...comments, {
+      _id: "",
+      nftId: NFT.id,
+      author: user.walletId,
+      note: rate,
+      text: comment,
+      authorName: user.name,
+      authorPicture: user.picture ? user.picture : `/boy.png`
+    }])
+    setRated(false)
+    setMessage("Comment added")
+    setTimeout(() => {
+      getComments(NFT.id, setComments, page, comments).then(page => setPage(page))
+    }, 1000)
+  }
+
+  const handleLoad = () => {
+    console.log("load", page)
+    getComments(NFT.id, setComments, comments.length < page*5 ? page : page+1, comments).then(page => setPage(page))
+  }
+
   return (
     <div className={style.Container}>
       <div className={style.MainWrapper}>
@@ -211,7 +258,10 @@ const NFTPage: React.FC<NFTPageProps> = ({
                 </div>
               </div>
             </div>
-            <h1 className={style.Title}>{NFT.name}</h1>
+            <div className={style.NFTHeader}>
+              <h1 className={style.Title}>{NFT.name}</h1>
+              <span className={style.AvgRate}>{average}<img src={starImage} alt="star" width={40}/></span>
+            </div>
             <p className={style.Description}>{NFT.description}</p>
             <div className={style.Buy}>
               <div
@@ -256,6 +306,21 @@ const NFTPage: React.FC<NFTPageProps> = ({
               </div>
               <div className={style.AvailableBackLine} />
             </div>
+            <div className={style.Rate}>
+                <div>
+                  {displayStars(5, emptyStarImage, true)}
+                </div>
+                <div className={style.Message}>
+                  {message ? message : ""}
+                </div>
+                {rated ?
+                  <div className={style.RateForm}>
+                    <textarea value={comment} onChange={e => setComment(e.target.value)}/>
+                    <div className={style.Button} onClick={() => handleSubmit()}>Comment</div>
+                  </div>
+                  : ""
+                }
+              </div>
           </div>
         </div>
         <div>
@@ -265,6 +330,21 @@ const NFTPage: React.FC<NFTPageProps> = ({
             setNftToBuy={setNftToBuy}
             setExp={setExp}
           />
+        </div>
+        <div className={style.Comments}>
+              {comments.map(c => {
+                return <div className={style.Comment} key={c._id}>
+                  <div className={style.AuthorPicture}>
+                    <img src={c.authorPicture} alt={`${c.authorName} picture`} width={50}/>
+                  </div>
+                  <div className={style.CommentTop} >
+                    <h3 className={style.Author}>{c.authorName}</h3>
+                    <div className={style.Stars}>{displayStars(Number(c.note))}</div>
+                  </div>
+                  <p className={style.CommentText}>{c.text}</p>
+                </div>
+              })}
+              <div className={style.Button} onClick={() => handleLoad()}>Load more</div>
         </div>
       </div>
       <Footer setNotAvailable={setNotAvailable} />
@@ -280,6 +360,14 @@ const NFTPage: React.FC<NFTPageProps> = ({
       )}
     </div>
   );
+
+  function displayStars(note: number, img?: string, selected?: boolean){
+    let content = [];
+    for(let i = 0; i<note; i++){
+      content.push(<img src={img ? rate > i ? starImage : img : starImage} alt="star" width={25} draggable={false} className={selected ? style.RateStar : ""}  onClick={handleRate}  onMouseEnter={() => setRate(i+1)} key={i}></img>)
+    }
+    return content;
+  }
 };
 
 export default NFTPage;
